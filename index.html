@@ -19,6 +19,7 @@
         .terminal-line {
             margin-bottom: 8px;
             white-space: pre-wrap;
+            display: block;
         }
 
         /* Subtle blinking cursor effect */
@@ -49,21 +50,20 @@
 
     <script>
         const consoleLines = [
-            { text: "starting bot...", delay: 0 },
-            { text: "authenticating to Dino modding network...", delay: 2000 },
-            { text: "success", delay: 1000 },
-            { text: "connecting to servers...", delay: 1200 },
-            { text: "server found", delay: 800 },
-            { text: "IP address generated: 192.168." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255), delay: 600 },
-            { text: "connecting to Discord...", delay: 1000 },
-            { text: "successfully started bot", delay: 800 },
+            { id: "line1", text: "Starting bot...", delay: 0, append: false },
+            { id: "line2", text: "Authenticating to Dino modding network...", delay: 2000, append: false },
+            { targetId: "line2", text: "... Success", delay: 1000, append: true },
+            { id: "line3", text: "Connecting to servers...", delay: 1200, append: false },
+            { id: "line4", text: "Server found.", delay: 800, append: false },
+            { id: "line5", text: "Connecting to Discord...", delay: 1000, append: false },
+            { id: "line6", text: "Successfully started bot.", delay: 800, append: false },
             { text: "", delay: 500, isSpacer: true }, // Empty line break
             { text: "", delay: 100, isSpacer: true }, // Empty line break
-            { text: "starting discord...", delay: 1200 },
-            { text: "bootstrapping...", delay: 700 },
-            { text: "loading data...", delay: 900 },
-            { text: "success", delay: 600 },
-            { text: "redirecting...", delay: 1000 }
+            { id: "line7", text: "Starting Discord...", delay: 1200, append: false },
+            { id: "line8", text: "Bootstrapping...", delay: 700, append: false },
+            { id: "line9", text: "Loading data...", delay: 900, append: false },
+            { targetId: "line9", text: "... Success", delay: 600, append: true },
+            { id: "line10", text: "Redirecting...", delay: 1000, append: false }
         ];
 
         const terminalContainer = document.getElementById('terminal');
@@ -71,7 +71,7 @@
 
         function printNextLine() {
             if (currentLineIndex >= consoleLines.length) {
-                // REPLACE THIS LINK with your actual Discord invite URL
+                // REPLACE THIS LINK with your actual Discord server invite link
                 window.location.href = "https://discord.com"; 
                 return;
             }
@@ -79,16 +79,24 @@
             const currentLine = consoleLines[currentLineIndex];
 
             setTimeout(() => {
-                const lineElement = document.createElement('div');
-                
                 if (currentLine.isSpacer) {
-                    lineElement.className = 'spacer';
+                    const spacerElement = document.createElement('div');
+                    spacerElement.className = 'spacer';
+                    terminalContainer.appendChild(spacerElement);
+                } else if (currentLine.append) {
+                    // Find the existing line and add text directly to it
+                    const existingLine = document.getElementById(currentLine.targetId);
+                    if (existingLine) {
+                        existingLine.textContent += currentLine.text;
+                    }
                 } else {
+                    // Create a brand new line
+                    const lineElement = document.createElement('span');
                     lineElement.className = 'terminal-line';
+                    lineElement.id = currentLine.id;
                     lineElement.textContent = currentLine.text;
+                    terminalContainer.appendChild(lineElement);
                 }
-
-                terminalContainer.appendChild(lineElement);
                 
                 // Automatically scroll down as text populates
                 window.scrollTo(0, document.body.scrollHeight);
